@@ -9,6 +9,13 @@ verify_ssl = true
 fastapi = "*"
 uvicorn = "*"
 click = "*"
+pandas = "*"
+pandas-ta = "*"
+ta-lib = "*"
+yfinance = "*"
+motor = "*"
+pydantic = "*"
+pymongo = "*"
 
 [requires]
-python_version = "3.11"
+python_version = "3.9"
