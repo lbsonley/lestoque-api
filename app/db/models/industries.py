@@ -9,6 +9,9 @@ class IndustryItemModel(BaseModel):
     symbol: str = Field(...)
     name: str = Field(...)
     sector: str = Field(default=None)
+    atrPct: float = Field(default=None)
+    qoqChange: float = Field(default=None)
+    yoyChange: float = Field(default=None)
     model_config = ConfigDict(
         populate_by_name=True,
         json_encoders={ObjectId: str},
@@ -18,6 +21,9 @@ class IndustryItemModel(BaseModel):
                 "symbol": "ITB",
                 "name": "Home Construction",
                 "sector": "Consumer Discretionary",
+                "atrPct": 2.554,
+                "qoqChange": 0.154,
+                "yoyChange": 0.554,
             }
         },
     )

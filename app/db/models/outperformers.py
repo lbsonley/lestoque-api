@@ -18,7 +18,8 @@ class WatchlistItemModel(BaseModel):
     sector: str = Field(default=None)
     subIndustry: str = Field(default=None)
     atrPct: float = Field(default=None)
-    change: float = Field(default=None)
+    qoqChange: float = Field(default=None)
+    yoyChange: float = Field(default=None)
     model_config = ConfigDict(
         populate_by_name=True,
         json_encoders={ObjectId: str},
@@ -30,7 +31,8 @@ class WatchlistItemModel(BaseModel):
                 "sector": "Consumer Discretionary",
                 "subIndustry": "Hotels, Resorts & Cruise Lines",
                 "atrPct": 2.554,
-                "change": 0.554,
+                "qoqChange": 0.154,
+                "yoyChange": 0.554,
             }
         },
     )

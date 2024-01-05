@@ -16,25 +16,7 @@ async def get_sp_500_change(start: str, end: str):
     return sp500_change
 
 
-async def get_outperformers(start, end, sp500_change):
-    constituents = pd.read_html(
-        "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
-    )[0]
-
-    constituents.index = constituents["Symbol"]
-    constituents = constituents[
-        ["Security", "GICS Sector", "GICS Sub-Industry"]
-    ]
-    constituents.index.names = ["symbol"]
-    constituents = constituents.rename(
-        columns={
-            "Security": "name",
-            "GICS Sector": "sector",
-            "GICS Sub-Industry": "subIndustry",
-        }
-    )
-    constituents.index = constituents.index.str.replace(".", "-")
-
+async def get_constituents_change(constituents, start, end):
     df = yf.download(
         tickers=constituents.index.to_list(),
         interval="1d",
@@ -56,23 +38,22 @@ async def get_outperformers(start, end, sp500_change):
             key=symbol, level="symbol"
         ).iloc[-1]["atr_pct"]
 
-        start_price = df.xs(key=symbol, level="symbol").iloc[0]["close"]
+        qoq_index = -65
+        if len(df.xs(key=symbol, level="symbol")) < 65:
+            qoq_index = -1
+
+        yoy_price = df.xs(key=symbol, level="symbol").iloc[0]["close"]
+        qoq_price = df.xs(key=symbol, level="symbol").iloc[qoq_index]["close"]
         end_price = df.xs(key=symbol, level="symbol").iloc[-1]["close"]
-        constituents.at[symbol, "change"] = (
-            end_price - start_price
-        ) / start_price
+        constituents.at[symbol, "yoy_change"] = (
+            end_price - yoy_price
+        ) / yoy_price
+        constituents.at[symbol, "qoq_change"] = (
+            end_price - qoq_price
+        ) / qoq_price
 
-    outperformers = constituents[
-        (constituents["change"] > sp500_change)
-        & (constituents["atr_pct"] >= 2)
-        & (constituents["atr_pct"] <= 3)
-    ]
-    outperformers = outperformers.reset_index()
+    constituents = constituents.reset_index()
 
-    outperformers = outperformers.sort_values(by="change", ascending=False)
+    constituents = constituents.sort_values(by="yoy_change", ascending=False)
 
-    return outperformers.to_dict(orient="records")
-
-    # don't forget that you already download 52 week weekly ohlc here
-    # return {"outperformers": outperformers, "df": df}
-    # return outperformers.to_json(orient="records")
+    return constituents.to_dict(orient="records")

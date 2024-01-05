@@ -1,7 +1,10 @@
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
+import pandas as pd
+import yfinance as yf
 from ..db.models.industries import IndustryItemModel, IndustryCollection
 from ..db.connection import industries_collection
+from ..dependencies.performance import get_constituents_change
 
 router = APIRouter()
 
@@ -11,9 +14,11 @@ router = APIRouter()
     response_class=JSONResponse,
     status_code=200,
 )
-async def sync_industries():
+async def load_industries():
     return IndustryCollection(
-        items=await industries_collection.find().to_list(1000)
+        items=await industries_collection.find()
+        .sort({"qoqChange": -1})
+        .to_list(1000)
     )
 
 
@@ -22,144 +27,25 @@ async def sync_industries():
     response_class=JSONResponse,
     status_code=200,
 )
-async def sync_industries():
-    industries = [
-        {
-            "symbol": "IBB",
-            "name": "Biotechnology",
-            "sector": "Healthcare",
-        },
-        {
-            "symbol": "IHF",
-            "name": "Healthcare Providers",
-            "sector": "Healthcare",
-        },
-        {
-            "symbol": "IHI",
-            "name": "Medical Devices",
-            "sector": "Healthcare",
-        },
-        {
-            "symbol": "IHE",
-            "name": "Pharmaceuticals",
-            "sector": "Healthcare",
-        },
-        {
-            "symbol": "IEZ",
-            "name": "Oil Equipment & Services",
-            "sector": "Energy",
-        },
-        {
-            "symbol": "IEO",
-            "name": "Oil & Gas Exploration",
-            "sector": "Energy",
-        },
-        {
-            "symbol": "IGM",
-            "name": "Expanded Tech",
-            "sector": "Technology",
-        },
-        {
-            "symbol": "SOXX",
-            "name": "Semiconductors",
-            "sector": "Technology",
-        },
-        {
-            "symbol": "IGV",
-            "name": "Tech Software",
-            "sector": "Technology",
-        },
-        {
-            "symbol": "IGN",
-            "name": "Tech Multimedia",
-            "sector": "Technology",
-        },
-        {
-            "symbol": "ITA",
-            "name": "Aerospace & Defense",
-            "sector": "Industrials",
-        },
-        {
-            "symbol": "IYT",
-            "name": "Transportation",
-            "sector": "Industrials",
-        },
-        {
-            "symbol": "ITB",
-            "name": "Home Construction",
-            "sector": "Consumer Discretionary",
-        },
-        {
-            "symbol": "IAI",
-            "name": "Broker-Dealers & Securities Exchange",
-            "sector": "Financials",
-        },
-        {
-            "symbol": "IYG",
-            "name": "Financial Services",
-            "sector": "Financials",
-        },
-        {
-            "symbol": "IYK",
-            "name": "Insurance",
-            "sector": "Financials",
-        },
-        {
-            "symbol": "IAT",
-            "name": "Regional Banks",
-            "sector": "Financials",
-        },
-        {
-            "symbol": "REM",
-            "name": "Mortgage REITS",
-            "sector": "Real Estate",
-        },
-        {
-            "symbol": "REZ",
-            "name": "Residential Real Estate",
-            "sector": "Real Estate",
-        },
-        {
-            "symbol": "ICOP",
-            "name": "Copper & Metals Miners",
-            "sector": "Materials",
-        },
-        {
-            "symbol": "RING",
-            "name": "Gold Miners",
-            "sector": "Materials",
-        },
-        {
-            "symbol": "ILIT",
-            "name": "Lithium Miners & Producers",
-            "sector": "Materials",
-        },
-        {
-            "symbol": "PICK",
-            "name": "Metal Producers & Miners",
-            "sector": "Materials",
-        },
-        {
-            "symbol": "SLVP",
-            "name": "Silver Miners",
-            "sector": "Materials",
-        },
-        {
-            "symbol": "WOOD",
-            "name": "Timber & Forestry",
-            "sector": "Materials",
-        },
-    ]
+async def sync_industries(start: str, end: str):
+    constituents = pd.read_csv(
+        filepath_or_buffer="app/db/static/industries.csv", index_col="symbol"
+    )
+
+    industries = await get_constituents_change(constituents, start, end)
 
     inserted_ids = []
 
-    industries_collection.drop()
+    await industries_collection.drop()
 
     for etf in industries:
         model = IndustryItemModel(
             symbol=etf["symbol"],
             name=etf["name"],
             sector=etf["sector"],
+            atrPct=etf["atr_pct"],
+            qoqChange=etf["qoq_change"],
+            yoyChange=etf["yoy_change"],
         )
 
         db_result = await industries_collection.insert_one(
@@ -168,3 +54,16 @@ async def sync_industries():
         inserted_ids.append(db_result.inserted_id)
 
     return industries
+
+
+@router.get(
+    "/cron/industry-constituents",
+    response_class=JSONResponse,
+    status_code=200,
+)
+async def sync_industry_constituents():
+    constituents = pd.read_csv(
+        "https://www.ishares.com/us/products/239771/ishares-north-american-techsoftware-etf/1467271812596.ajax?fileType=csv&fileName=IGV_holdings&dataType=fund"
+    )
+
+    return constituents.to_dict(orient="records")

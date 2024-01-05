@@ -3,7 +3,11 @@ from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from ..db.models.outperformers import WatchlistItemModel, WatchlistCollection
 from ..db.connection import outperformers_collection
-from ..dependencies.performance import get_sp_500_change, get_outperformers
+from ..dependencies.performance import (
+    get_sp_500_change,
+    get_constituents_change,
+)
+from ..dependencies.constituents import get_sp_500_constituents
 
 router = APIRouter()
 
@@ -15,7 +19,9 @@ router = APIRouter()
 )
 async def load_outperformers():
     return WatchlistCollection(
-        items=await outperformers_collection.find().to_list(1000)
+        items=await outperformers_collection.find()
+        .sort({"qoqChange": -1})
+        .to_list(1000)
     )
 
 
@@ -24,15 +30,15 @@ async def load_outperformers():
     response_class=JSONResponse,
     status_code=200,
 )
-async def sync_outperformers():
-    sp_500_change = await get_sp_500_change("2023-09-28", "2023-12-29")
-    outperformers: List[WatchlistItemModel] = await get_outperformers(
-        "2023-09-28", "2023-12-29", sp_500_change
+async def sync_outperformers(start: str, end: str):
+    sp_500_constituents = await get_sp_500_constituents()
+    outperformers: List[WatchlistItemModel] = await get_constituents_change(
+        sp_500_constituents, start, end
     )
 
     inserted_ids = []
 
-    outperformers_collection.drop()
+    await outperformers_collection.drop()
 
     for stock in outperformers:
         model = WatchlistItemModel(
@@ -41,7 +47,8 @@ async def sync_outperformers():
             sector=stock["sector"],
             subIndustry=stock["subIndustry"],
             atrPct=stock["atr_pct"],
-            change=stock["change"],
+            qoqChange=stock["qoq_change"],
+            yoyChange=stock["yoy_change"],
         )
 
         db_result = await outperformers_collection.insert_one(
