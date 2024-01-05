@@ -40,5 +40,7 @@ hooks:
         # Download the latest version of pip
         python3.9 -m pip install --upgrade pip
 
+        pip install --upgrade pipenv
+
         # Install dependencies
         pipenv install --deploy
