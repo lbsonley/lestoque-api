@@ -1,7 +1,7 @@
 from typing import List
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
-from ..db.models.outperformers import WatchlistItemModel, WatchlistCollection
+from ..db.models.watchlist import WatchlistItemModel, WatchlistCollection
 from ..db.connection import outperformers_collection
 from ..dependencies.performance import (
     get_sp_500_change,

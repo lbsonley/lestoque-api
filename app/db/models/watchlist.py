@@ -15,11 +15,11 @@ class WatchlistItemModel(BaseModel):
     id: Optional[PyObjectId] = Field(alias="_id", default=None)
     symbol: str = Field(...)
     name: str = Field(...)
-    sector: str = Field(default=None)
-    subIndustry: str = Field(default=None)
-    atrPct: float = Field(default=None)
-    qoqChange: float = Field(default=None)
-    yoyChange: float = Field(default=None)
+    sector: Optional[str] = Field(default=None)
+    subIndustry: Optional[str] = Field(default=None)
+    atrPct: Optional[float] = Field(default=None)
+    qoqChange: Optional[float] = Field(default=None)
+    yoyChange: Optional[float] = Field(default=None)
     model_config = ConfigDict(
         populate_by_name=True,
         json_encoders={ObjectId: str},

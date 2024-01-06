@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 import pandas as pd
 import yfinance as yf
-from ..db.models.industries import IndustryItemModel, IndustryCollection
+from ..db.models.watchlist import WatchlistItemModel, WatchlistCollection
 from ..db.connection import industries_collection
 from ..dependencies.performance import get_constituents_change
 
@@ -15,7 +15,7 @@ router = APIRouter()
     status_code=200,
 )
 async def load_industries():
-    return IndustryCollection(
+    return WatchlistCollection(
         items=await industries_collection.find()
         .sort({"qoqChange": -1})
         .to_list(1000)
@@ -39,7 +39,7 @@ async def sync_industries(start: str, end: str):
     await industries_collection.drop()
 
     for etf in industries:
-        model = IndustryItemModel(
+        model = WatchlistItemModel(
             symbol=etf["symbol"],
             name=etf["name"],
             sector=etf["sector"],
