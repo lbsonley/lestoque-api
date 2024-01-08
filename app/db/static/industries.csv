@@ -1,4 +1,4 @@
-symbol,name,sector
+symbol,name,sector\
 IBB,Biotechnology,Healthcare
 IHF,Healthcare Providers,Healthcare
 IHI,Medical Devices,Healthcare
@@ -18,9 +18,3 @@ IYK,Insurance,Financials
 IAT,Regional Banks,Financials
 REM,Mortgage REITS,Real Estate
 REZ,Residential Real Estate,Real Estate
-ICOP,Copper & Metals Miners,Materials
-RING,Gold Miners,Materials
-ILIT,Lithium Miners & Producers,Materials
-PICK,Metal Producers & Miners,Materials
-SLVP,Silver Miners,Materials
-WOOD,Timber & Forestry,Materials

@@ -1,25 +1,16 @@
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 import pandas as pd
-import yfinance as yf
-from ..db.models.watchlist import WatchlistItemModel, WatchlistCollection
-from ..db.connection import industries_collection
+from ..db.models.watchlist import WatchlistItemModel
+from ..db.connection import industries_collection, industry_collections
 from ..dependencies.performance import get_constituents_change
+from ..dependencies.constituents import get_industry_constituents
 
 router = APIRouter()
 
-
-@router.get(
-    "/api/industries",
-    response_class=JSONResponse,
-    status_code=200,
+industry_etfs = pd.read_csv(
+    filepath_or_buffer="app/db/static/industries.csv", index_col="symbol"
 )
-async def load_industries():
-    return WatchlistCollection(
-        items=await industries_collection.find()
-        .sort({"qoqChange": -1})
-        .to_list(1000)
-    )
 
 
 @router.get(
@@ -28,13 +19,7 @@ async def load_industries():
     status_code=200,
 )
 async def sync_industries(start: str, end: str):
-    constituents = pd.read_csv(
-        filepath_or_buffer="app/db/static/industries.csv", index_col="symbol"
-    )
-
-    industries = await get_constituents_change(constituents, start, end)
-
-    inserted_ids = []
+    industries = await get_constituents_change(industry_etfs, start, end)
 
     await industries_collection.drop()
 
@@ -48,10 +33,9 @@ async def sync_industries(start: str, end: str):
             yoyChange=etf["yoy_change"],
         )
 
-        db_result = await industries_collection.insert_one(
+        await industries_collection.insert_one(
             model.model_dump(by_alias=True, exclude=["id"])
         )
-        inserted_ids.append(db_result.inserted_id)
 
     return industries
 
@@ -61,9 +45,28 @@ async def sync_industries(start: str, end: str):
     response_class=JSONResponse,
     status_code=200,
 )
-async def sync_industry_constituents():
-    constituents = pd.read_csv(
-        "https://www.ishares.com/us/products/239771/ishares-north-american-techsoftware-etf/1467271812596.ajax?fileType=csv&fileName=IGV_holdings&dataType=fund"
-    )
+async def sync_industry_constituents(start: str, end: str):
+    for symbol in industry_etfs.index.to_list():
+        print(symbol)
+        await industry_collections[symbol].drop()
 
-    return constituents.to_dict(orient="records")
+        constituents = await get_industry_constituents(symbol)
+
+        constituent_spec = await get_constituents_change(
+            constituents, start, end
+        )
+
+        for stock in constituent_spec:
+            model = WatchlistItemModel(
+                symbol=stock["symbol"],
+                name=stock["name"],
+                atrPct=stock["atr_pct"],
+                qoqChange=stock["qoq_change"],
+                yoyChange=stock["yoy_change"],
+            )
+
+            await industry_collections[symbol].insert_one(
+                model.model_dump(by_alias=True, exclude=["id"])
+            )
+
+    return {"foo": "bar"}

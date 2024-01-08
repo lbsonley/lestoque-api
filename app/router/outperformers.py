@@ -1,28 +1,12 @@
 from typing import List
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
-from ..db.models.watchlist import WatchlistItemModel, WatchlistCollection
+from ..db.models.watchlist import WatchlistItemModel
 from ..db.connection import outperformers_collection
-from ..dependencies.performance import (
-    get_sp_500_change,
-    get_constituents_change,
-)
+from ..dependencies.performance import get_constituents_change
 from ..dependencies.constituents import get_sp_500_constituents
 
 router = APIRouter()
-
-
-@router.get(
-    "/api/outperformers",
-    response_class=JSONResponse,
-    status_code=200,
-)
-async def load_outperformers():
-    return WatchlistCollection(
-        items=await outperformers_collection.find()
-        .sort({"qoqChange": -1})
-        .to_list(1000)
-    )
 
 
 @router.get(
