@@ -4,9 +4,11 @@ from fastapi.responses import JSONResponse
 from ..db.models.watchlist import WatchlistItemModel, WatchlistCollection
 from ..db.connection import (
     db,
-    outperformers_collection,
+    indices_collection,
+    sectors_collection,
     industries_collection,
     industry_collections,
+    outperformers_collection,
 )
 from ..dependencies.performance import get_constituents_change
 from ..dependencies.constituents import get_sp_500_constituents
@@ -14,6 +16,8 @@ from ..dependencies.constituents import get_sp_500_constituents
 router = APIRouter()
 
 collectionMap = {
+    "indices": indices_collection,
+    "sectors": sectors_collection,
     "outperformers": outperformers_collection,
     "industries": industries_collection,
     **industry_collections,

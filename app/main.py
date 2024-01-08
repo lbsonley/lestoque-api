@@ -5,7 +5,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 
 # routes
-from .router import history, outperformers, industries, watchlists
+from .router import (
+    watchlists,
+    indices,
+    sectors,
+    industries,
+    history,
+    outperformers,
+)
 
 # app
 app = FastAPI()
@@ -32,9 +39,11 @@ async def load_root():
 
 
 app.include_router(watchlists.router)
+app.include_router(indices.router)
+app.include_router(sectors.router)
+app.include_router(industries.router)
 app.include_router(history.router)
 app.include_router(outperformers.router)
-app.include_router(industries.router)
 
 if __name__ == "__main__":
     port = os.getenv("PORT") or 8080
