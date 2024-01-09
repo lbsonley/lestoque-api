@@ -27,7 +27,6 @@ async def sync_industries(start: str, end: str):
         model = WatchlistItemModel(
             symbol=etf["symbol"],
             name=etf["name"],
-            sector=etf["sector"],
             atrPct=etf["atr_pct"],
             qoqChange=etf["qoq_change"],
             yoyChange=etf["yoy_change"],
