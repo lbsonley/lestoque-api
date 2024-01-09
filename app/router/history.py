@@ -5,6 +5,7 @@ import yfinance as yf
 router = APIRouter()
 
 patterns = [
+    "darkcloudcover",
     "doji",
     "dojistar",
     "engulfing",
