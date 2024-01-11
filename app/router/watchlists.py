@@ -1,7 +1,7 @@
 from typing import List
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
-from ..db.models.watchlist import WatchlistItemModel, WatchlistCollection
+from ..db.models.watchlist import WatchlistCollection
 from ..db.connection import (
     db,
     indices_collection,
@@ -10,8 +10,6 @@ from ..db.connection import (
     industry_collections,
     outperformers_collection,
 )
-from ..dependencies.performance import get_constituents_change
-from ..dependencies.constituents import get_sp_500_constituents
 
 router = APIRouter()
 
