@@ -4,6 +4,8 @@ import yfinance as yf
 
 router = APIRouter()
 
+# pattern code
+# https://github.com/TA-Lib/ta-lib-python/blob/master/talib/_func.pxi
 patterns = [
     "darkcloudcover",
     "doji",
@@ -37,7 +39,7 @@ def load_history(symbol: str, interval: str, start: str, end: str):
     signals = {}
     for pattern in cdl.columns:
         col = cdl[[pattern]]
-        dates = col[col[pattern] == 100.0].index
+        dates = col[(col[pattern] == 100.0) | (col[pattern] == -100)].index
         signals[pattern] = dates.to_list()
 
     # explicitly name index column
