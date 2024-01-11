@@ -3,6 +3,10 @@ import pandas as pd
 from .atr import calculate_atr
 
 
+# TODO => Retry fetching symbols that fail
+# https://github.com/ranaroussi/yfinance/issues/359
+
+
 async def get_sp_500_change(start: str, end: str):
     sp500 = yf.download(tickers=["SPY"], start=start, end=end)
 
@@ -16,7 +20,7 @@ async def get_sp_500_change(start: str, end: str):
     return sp500_change
 
 
-async def get_constituents_change(constituents, start, end):
+async def get_constituents_change(constituents, start, end, filter_atr=True):
     df = yf.download(
         tickers=constituents.index.to_list(),
         interval="1d",
@@ -53,6 +57,9 @@ async def get_constituents_change(constituents, start, end):
         ) / qoq_price
 
     constituents = constituents.reset_index()
+
+    if filter_atr:
+        constituents = constituents[constituents["atr_pct"] > 2]
 
     constituents = constituents.sort_values(by="yoy_change", ascending=False)
 

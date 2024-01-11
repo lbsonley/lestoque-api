@@ -18,7 +18,7 @@ index_etfs = pd.read_csv(
     status_code=200,
 )
 async def sync_indices(start: str, end: str):
-    indices = await get_constituents_change(index_etfs, start, end)
+    indices = await get_constituents_change(index_etfs, start, end, False)
 
     await indices_collection.drop()
 

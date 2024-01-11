@@ -18,7 +18,7 @@ sector_etfs = pd.read_csv(
     status_code=200,
 )
 async def sync_sectors(start: str, end: str):
-    sectors = await get_constituents_change(sector_etfs, start, end)
+    sectors = await get_constituents_change(sector_etfs, start, end, False)
 
     await sectors_collection.drop()
 
