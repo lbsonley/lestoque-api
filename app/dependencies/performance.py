@@ -1,5 +1,5 @@
 import yfinance as yf
-import pandas as pd
+import pandas_ta as ta
 from .atr import calculate_atr
 
 
@@ -35,12 +35,19 @@ async def get_constituents_change(constituents, start, end, filter_atr=True):
 
     # compute atr_pct to use as filter later
     df["atr_pct"] = df.groupby(level=1, group_keys=False).apply(calculate_atr)
+    df["vol_ma"] = df.groupby(level=1, group_keys=False).apply(
+        lambda x: ta.sma(x.volume, length=50)
+    )
 
     # loop through
     for symbol in constituents.index.to_list():
         constituents.at[symbol, "atr_pct"] = df.xs(
             key=symbol, level="symbol"
         ).iloc[-1]["atr_pct"]
+
+        constituents.at[symbol, "vol_ma"] = df.xs(
+            key=symbol, level="symbol"
+        ).iloc[-1]["vol_ma"]
 
         qoq_index = -65
         if len(df.xs(key=symbol, level="symbol")) < 65:
@@ -57,6 +64,8 @@ async def get_constituents_change(constituents, start, end, filter_atr=True):
         ) / qoq_price
 
     constituents = constituents.reset_index()
+
+    constituents = constituents[constituents["vol_ma"] > 4e6]
 
     if filter_atr:
         constituents = constituents[constituents["atr_pct"] > 2]

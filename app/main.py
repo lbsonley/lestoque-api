@@ -12,6 +12,9 @@ from .router import (
     industries,
     history,
     outperformers,
+    trade,
+    commentary,
+    etfs,
 )
 
 # app
@@ -44,6 +47,9 @@ app.include_router(sectors.router)
 app.include_router(industries.router)
 app.include_router(history.router)
 app.include_router(outperformers.router)
+app.include_router(trade.router)
+app.include_router(commentary.router)
+app.include_router(etfs.router)
 
 if __name__ == "__main__":
     port = os.getenv("PORT") or 8080

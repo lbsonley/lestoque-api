@@ -9,6 +9,7 @@ from ..db.connection import (
     industries_collection,
     industry_collections,
     outperformers_collection,
+    etfs_collection,
 )
 
 router = APIRouter()
@@ -17,6 +18,7 @@ collectionMap = {
     "indices": indices_collection,
     "sectors": sectors_collection,
     "outperformers": outperformers_collection,
+    "etfs": etfs_collection,
     "industries": industries_collection,
     **industry_collections,
 }
