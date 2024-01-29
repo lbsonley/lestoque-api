@@ -21,7 +21,7 @@ async def sync_outperformers(start: str, end: str):
         start=start,
         end=end,
         atr_cutoff=2.0,
-        vol_cutoff=4e6,
+        vol_cutoff=1e6,
     )
 
     inserted_ids = []
