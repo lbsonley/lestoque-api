@@ -7,14 +7,12 @@ from fastapi.responses import HTMLResponse
 # routes
 from .router import (
     watchlists,
-    indices,
-    sectors,
-    industries,
     history,
     outperformers,
     trade,
     commentary,
     etfs,
+    holdings,
 )
 
 # app
@@ -42,14 +40,12 @@ async def load_root():
 
 
 app.include_router(watchlists.router)
-app.include_router(indices.router)
-app.include_router(sectors.router)
-app.include_router(industries.router)
 app.include_router(history.router)
 app.include_router(outperformers.router)
 app.include_router(trade.router)
 app.include_router(commentary.router)
 app.include_router(etfs.router)
+app.include_router(holdings.router)
 
 if __name__ == "__main__":
     port = os.getenv("PORT") or 8080

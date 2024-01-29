@@ -17,7 +17,11 @@ router = APIRouter()
 async def sync_outperformers(start: str, end: str):
     sp_500_constituents = await get_sp_500_constituents()
     outperformers: List[WatchlistItemModel] = await get_constituents_change(
-        sp_500_constituents, start, end
+        constituents=sp_500_constituents,
+        start=start,
+        end=end,
+        atr_cutoff=2.0,
+        vol_cutoff=4e6,
     )
 
     inserted_ids = []

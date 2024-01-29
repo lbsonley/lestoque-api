@@ -20,7 +20,13 @@ async def get_sp_500_change(start: str, end: str):
     return sp500_change
 
 
-async def get_constituents_change(constituents, start, end, filter_atr=True):
+async def get_constituents_change(
+    constituents,
+    start,
+    end,
+    atr_cutoff=0.5,
+    vol_cutoff=1e6,
+):
     df = yf.download(
         tickers=constituents.index.to_list(),
         interval="1d",
@@ -65,10 +71,9 @@ async def get_constituents_change(constituents, start, end, filter_atr=True):
 
     constituents = constituents.reset_index()
 
-    constituents = constituents[constituents["vol_ma"] > 4e6]
+    constituents = constituents[constituents["vol_ma"] > vol_cutoff]
 
-    if filter_atr:
-        constituents = constituents[constituents["atr_pct"] > 2]
+    constituents = constituents[constituents["atr_pct"] > atr_cutoff]
 
     constituents = constituents.sort_values(by="yoy_change", ascending=False)
 

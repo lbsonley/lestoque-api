@@ -18,7 +18,11 @@ etfs = pd.read_csv(
     status_code=200,
 )
 async def sync_etfs(start: str, end: str):
-    securities = await get_constituents_change(etfs, start, end, False)
+    securities = await get_constituents_change(
+        constituents=etfs,
+        start=start,
+        end=end,
+    )
 
     await etfs_collection.drop()
 
