@@ -3,7 +3,6 @@ import pandas as pd
 
 client = motor.motor_asyncio.AsyncIOMotorClient(
     "mongodb://localhost:27017/watchlists"
-    # "mongodb+srv://lbsonley:Trad34amil@lestoque-report.plbtscq.mongodb.net/"
 )
 db = client.watchlists
 outperformers_collection = db.get_collection("outperformers")
